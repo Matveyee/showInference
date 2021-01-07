@@ -22,7 +22,24 @@ else()
 	link_directories("/usr/lib/aarch64-linux-gnu")
 endif()
 #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-add_executable(main src/Inference_fps_test.cpp )
+add_executable(main MultithreadInference_yuyv_file_READY.cpp )
 
-target_link_libraries(main  -pthread -lssl -lcrypto -ldrm  -lavformat -lavcodec -lavutil -lz rga swscale ${OpenCV_LIBS})
+target_link_libraries(main
+    -pthread
+    -lssl
+    -lcrypto
+    -lavformat
+    -lavcodec
+    -lavutil
+    -lswscale
+    -lswresample
+    -lz
+    -llzma
+    -lm
+    -lrga
+    -ldrm
+    -ldl
+    HailoRT::libhailort
+    -lrockchip_mpp
+)
 target_link_libraries(main HailoRT::libhailort)

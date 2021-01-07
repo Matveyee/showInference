@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
-#include "opencv2/opencv.hpp"
 #include <unistd.h> // для Unix систем
 #include "hailo/hailort.hpp"
 #include <chrono>
@@ -136,7 +135,7 @@ void frameProc() {
     //debug("before inference");
     auto start = std::chrono::high_resolution_clock::now();
    // debug("Before inference");
-    auto job = infer_model1.run_async(bindings,[&](const AsyncInferCompletionInfo & info){
+    auto job = infer_model1.run_async(bindings,[&, start](const AsyncInferCompletionInfo & info){
      //   debug("After inference");
        //debug("Frame processed");
         auto end = std::chrono::high_resolution_clock::now();

@@ -102,7 +102,7 @@ try:
 except Exception as e:
     print(f"Error while inspecting hn_dict: {e}")
 
-===============================================
+# ===============================================
 
 import numpy as np
 from PIL import Image

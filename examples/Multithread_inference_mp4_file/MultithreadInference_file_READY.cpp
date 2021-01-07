@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
-#include "opencv2/opencv.hpp"
 #include <unistd.h> // для Unix систем
 #include "hailo/hailort.hpp"
 #include <chrono>

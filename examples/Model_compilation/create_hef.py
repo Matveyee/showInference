@@ -53,45 +53,14 @@ chosen_hw_arch = "hailo8"
 runner = ClientRunner(hw_arch=chosen_hw_arch)
 
 end_node_names = [
-    # "/detect/cls_preds.0/Conv",
-    # "/detect/cls_preds.1/Conv",
-    # "/detect/cls_preds.2/Conv",
-    # "/detect/reg_preds.0/Conv",
-    # "/detect/reg_preds.1/Conv",
-    # "/detect/reg_preds.2/Conv",
     "/model.22/cv2.0/cv2.0.2/Conv",
     "/model.22/cv3.0/cv3.0.2/Conv",
     "/model.22/cv2.1/cv2.1.2/Conv",
     "/model.22/cv3.1/cv3.1.2/Conv",
     "/model.22/cv2.2/cv2.2.2/Conv",
     "/model.22/cv3.2/cv3.2.2/Conv"
-]
 
-end_node_names = [
-    "Conv_102",
-    "Conv_103",
-   # "Sigmoid_104",
-    "Conv_98",
-   # "Sigmoid_105",
-    "Conv_158",
-    "Conv_159",
-   # "Sigmoid_160",
-    "Conv_154",
-   # "Sigmoid_161",
-    "Conv_214",
-    "Conv_215",
-   # "Sigmoid_216",
-    "Conv_210",
-   # "Sigmoid_217"
 ]
-# end_node_names = [
-#     "Sigmoid_134",
-#     "Conv_133",
-#     "Sigmoid_148",
-#     "Conv_147",
-#     "Sigmoid_162",
-#     "Conv_161"
-# ]
 net_input_shapes = {"image_arrays": [1, 3, 640, 640]}  # уменьши batch до 1
 
 try:
@@ -116,60 +85,60 @@ except Exception as e:
 
 # ===============================================
 
-# from hailo_sdk_client import ClientRunner
-# har_path = "detector.har"
-# runner = ClientRunner(har=har_path)
-# from pprint import pprint
+from hailo_sdk_client import ClientRunner
+har_path = "detector.har"
+runner = ClientRunner(har=har_path)
+from pprint import pprint
 
-# try:
-#     hn_dict = runner.get_hn()  # Or use runner._hn if get_hn() is unavailable
-#     print("Inspecting layers from HailoNet (OrderedDict):")
+try:
+    hn_dict = runner.get_hn()  # Or use runner._hn if get_hn() is unavailable
+    print("Inspecting layers from HailoNet (OrderedDict):")
 
-#     for key, value in hn_dict.items():
-#         print(f"Key: {key}")
-#         pprint(value)
-#         print("\\n" + "="*80 + "\\n")
+    for key, value in hn_dict.items():
+        print(f"Key: {key}")
+        pprint(value)
+        print("\\n" + "="*80 + "\\n")
 
-# except Exception as e:
-#     print(f"Error while inspecting hn_dict: {e}")
+except Exception as e:
+    print(f"Error while inspecting hn_dict: {e}")
 
-# ===============================================
+===============================================
 
-# import numpy as np
-# from PIL import Image
-# import os
+import numpy as np
+from PIL import Image
+import os
 
-# # Paths to directories and files
-# image_dir = 'calibration'
+# Paths to directories and files
+image_dir = 'calibration'
 
-# # File paths for saving calibration data
-# calibration_data_path = os.path.join("calibration_data.npy")
-# processed_data_path = os.path.join("processed_calibration_data.npy")
+# File paths for saving calibration data
+calibration_data_path = os.path.join("calibration_data.npy")
+processed_data_path = os.path.join("processed_calibration_data.npy")
 
-# # Initialize an empty list for calibration data
-# calib_data = []
+# Initialize an empty list for calibration data
+calib_data = []
 
-# # Process all image files in the directory
-# for img_name in os.listdir(image_dir):
-#     img_path = os.path.join(image_dir, img_name)
-#     if img_name.lower().endswith(('.jpg', '.jpeg', '.png')):
-#         img = Image.open(img_path).convert("RGB").resize((640, 640))
-#         img_array = np.array(img) / 255.0  # Normalize to [0, 1]
-#         calib_data.append(img_array)    
+# Process all image files in the directory
+for img_name in os.listdir(image_dir):
+    img_path = os.path.join(image_dir, img_name)
+    if img_name.lower().endswith(('.jpg', '.jpeg', '.png')):
+        img = Image.open(img_path).convert("RGB").resize((640, 640))
+        img_array = np.array(img) / 255.0  # Normalize to [0, 1]
+        calib_data.append(img_array)    
 
-# # Convert the calibration data to a NumPy array
-# calib_data = np.array(calib_data)
+# Convert the calibration data to a NumPy array
+calib_data = np.array(calib_data)
 
-# # Save the normalized calibration data
-# np.save(calibration_data_path, calib_data)
-# print(f"Normalized calibration dataset saved with shape: {calib_data.shape} to {calibration_data_path}")
+# Save the normalized calibration data
+np.save(calibration_data_path, calib_data)
+print(f"Normalized calibration dataset saved with shape: {calib_data.shape} to {calibration_data_path}")
 
-# # Scale the normalized data back to [0, 255]
-# processed_calibration_data = calib_data * 255.0
+# Scale the normalized data back to [0, 255]
+processed_calibration_data = calib_data * 255.0
 
-# # Save the processed calibration data
-# np.save(processed_data_path, processed_calibration_data)
-# print(f"Processed calibration dataset saved with shape: {processed_calibration_data.shape} to {processed_data_path}")
+# Save the processed calibration data
+np.save(processed_data_path, processed_calibration_data)
+print(f"Processed calibration dataset saved with shape: {processed_calibration_data.shape} to {processed_data_path}")
 
 # ===============================================
 

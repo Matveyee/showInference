@@ -16,7 +16,7 @@ extern "C" {
 #include <csignal>
 #include <sys/mman.h>
 #include "hailo/hailort.hpp"
-#include "../include/utils.hpp"
+// #include "../include/utils.hpp"
 
 using namespace hailort;
 //variables 
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
     infer_model = vdevice->create_infer_model(HEF_FILE).expect("Failed to create infer model");
     configured_infer_model = infer_model->configure().expect("Failed to create configured infer model");
 
-    av_register_all();
+//    av_register_all();
 
     AVFormatContext* fmt_ctx = nullptr;
     if (avformat_open_input(&fmt_ctx, SOURCE_PATH.c_str(), nullptr, nullptr) < 0) {
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
                               rgb_frame->data, rgb_frame->linesize);
         //debug("Frame scaled");
         av_frame_free(&frame);
-        if (pkt->convergence_duration == video_stream_idx) {
+ //       if (pkt->convergence_duration == video_stream_idx) {
             //debug("Before push");
             Duplet dup;
             dup.pkt = pkt;
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
            // debug("Frame pushed");
             queue.push(dup);
             captured_index++;
-        }
+  //      }
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
        // captured_index++;

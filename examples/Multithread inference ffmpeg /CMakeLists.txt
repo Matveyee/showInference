@@ -12,6 +12,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories("/home/user/OnlineDetection/include")
 include_directories(".include/")
 include_directories("/usr/local/include/rockchip")
+include_directories("/usr/local/mpp/include/rockchip/")
 link_directories(/usr/lib/aarch64-linux-gnu)
 include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(HailoRT REQUIRED)
@@ -23,7 +24,7 @@ else()
 	link_directories("/usr/lib/aarch64-linux-gnu")
 endif()
 #set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-add_executable(main src/MultithreadInference_ffmpeg_file.cpp )
+add_executable(main MultithreadInference_ffmpeg_file.cpp )
 
 target_link_libraries(main
     -pthread

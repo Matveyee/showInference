@@ -195,7 +195,7 @@ int main(int argc, char* argv[]) {
     infer_model = vdevice->create_infer_model(HEF_FILE).expect("Failed to create infer model");
     configured_infer_model = infer_model->configure().expect("Failed to create configured infer model");
 
-    av_register_all();
+//    av_register_all();
 
     AVFormatContext* fmt_ctx = nullptr;
     if (avformat_open_input(&fmt_ctx, SOURCE_PATH.c_str(), nullptr, nullptr) < 0) {
@@ -242,11 +242,11 @@ int main(int argc, char* argv[]) {
         auto start = std::chrono::high_resolution_clock::now();
         AVPacket* pkt = av_packet_alloc();
         av_read_frame(fmt_ctx, pkt);
-        if (pkt->convergence_duration == video_stream_idx) {
+//        if (pkt->convergence_duration == video_stream_idx) {
             //debug("Before push");
             queue.push(pkt);
             captured_index++;
-        }
+//        }
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
        // captured_index++;

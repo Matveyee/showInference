@@ -27,11 +27,13 @@ std::string HEF_FILE;
 std::string SOURCE_PATH;
 int FRAMES;
 int FPS;
+int SOFT;
 //cv::VideoCapture cap;
 std::unique_ptr<hailort::VDevice> vdevice;
 std::shared_ptr<hailort::InferModel> infer_model;
 hailort::ConfiguredInferModel configured_infer_model;
 std::vector<double> times;
+std::vector<int> diff;
 std::mutex queue_mutex;
 int captured_index = 0;
 int processed_index = 0;
@@ -40,6 +42,7 @@ int processed_index = 0;
 #if defined(__unix__)
 #include <sys/mman.h>
 #endif
+
 void debug(std::string message) {
     std::cout << "DEBUG: " << message << std::endl;
 
@@ -143,6 +146,11 @@ void frameProc() {
        // auto bboxes = parse_nms_data(output_buffer.get(), 80);
        // std::cout << "Frame processed" << std::endl;
         std::unique_lock<std::mutex> lock(queue_mutex);
+        if (captured_index >= FRAMES ) {
+            if (processed_index % 10 == 0) {
+                std::cout << "Processing " << processed_index << std::endl;
+            }
+        }
         //debug("Entering pop");
         
         queue.pop_front();
@@ -171,18 +179,19 @@ int main(int argc, char* argv[]) {
 
     if (argc == 0) {
         std::cout << "Usage: " << std::endl;
-        std::cout << argv[0] << " {path to HEF file} {path to mp4 480x640 file} {count of frames to process} {input FPS}" << std::endl;
+        std::cout << argv[0] << " {path to HEF file} {path to mp4 480x640 file} {count of frames to process} {input FPS} {soft mode 1/0}" << std::endl;
         return 0;
     }
     HEF_FILE = argv[1];
     if (HEF_FILE == "--help") {
         std::cout << "Usage: " << std::endl;
-        std::cout << argv[0] << " {path to HEF file} {path to mp4 480x640 file} {count of frames to process} {input FPS}" << std::endl;
+        std::cout << argv[0] << " {path to HEF file} {path to mp4 480x640 file} {count of frames to process} {input FPS} {soft_mode 1/0}" << std::endl;
         return 0;
     }
     SOURCE_PATH = argv[2];
     FRAMES = std::stoi(argv[3]);
     FPS = std::stoi(argv[4]);
+    SOFT = std::stoi(argv[5]);
     
 
     vdevice = VDevice::create().expect("Failed create vdevice");
@@ -241,8 +250,59 @@ int main(int argc, char* argv[]) {
 
     signal(SIGINT, sigint_handler);
     int i = 0;
-    std::thread infer(inference);
     auto gen_start = std::chrono::high_resolution_clock::now();
+    if (SOFT == 0) {
+
+    std::thread infer(inference);
+    
+    while (running && i < FRAMES) {
+        auto start = std::chrono::high_resolution_clock::now();
+        AVFrame* frame = av_frame_alloc();
+        AVFrame* rgb_frame = av_frame_alloc();
+        AVPacket* pkt = av_packet_alloc();
+        int rgb_buf_size = av_image_get_buffer_size(AV_PIX_FMT_BGR24, 640, 640, 1);
+        uint8_t* rgb_buf = (uint8_t*)av_malloc(rgb_buf_size * sizeof(uint8_t));
+        av_image_fill_arrays(rgb_frame->data, rgb_frame->linesize, rgb_buf,
+                            AV_PIX_FMT_BGR24, 640, 640, 1);
+      //  debug("Packet allocated");
+        av_read_frame(fmt_ctx, pkt);
+      //  debug("Frame read");
+        avcodec_send_packet(codec_ctx, pkt);
+       // debug("Packet sent");
+        avcodec_receive_frame(codec_ctx, frame);
+       // debug("Packet received");
+        sws_scale(sws_ctx, frame->data, frame->linesize, 0, height,
+                              rgb_frame->data, rgb_frame->linesize);
+        //debug("Frame scaled");
+        av_frame_free(&frame);
+ //       if (pkt->convergence_duration == video_stream_idx) {
+            //debug("Before push");
+            Duplet dup;
+            dup.pkt = pkt;
+            dup.frame = rgb_frame;
+           // debug("Frame pushed");
+            queue.push(dup);
+            captured_index++;
+  //      }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> duration = end - start;
+        diff.push_back(captured_index - processed_index);
+       // captured_index++;
+    //    if (captured_index % 10 == 0) {
+    //     std::cout << processed_index << ";" << captured_index << std::endl;
+    //    }
+        
+       // std::cout << "Time = " <<(int)(1.0/FPS * 1000) - (int)duration.count() << std::endl;
+     //  std::cout << "Current FPS " << 1 / (duration.count() / 1000) << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds( (int)(1.0/FPS * 1000) - (int)duration.count() ));
+        i++;
+    }
+   // STOP_CAP = 0;
+
+    infer.join();
+    } else {
+        
+    
     while (running && i < FRAMES) {
         auto start = std::chrono::high_resolution_clock::now();
         AVFrame* frame = av_frame_alloc();
@@ -275,25 +335,30 @@ int main(int argc, char* argv[]) {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
        // captured_index++;
-        std::cout << processed_index << ";" << captured_index << std::endl;
+       diff.push_back(captured_index - processed_index);
+
+        
        // std::cout << "Time = " <<(int)(1.0/FPS * 1000) - (int)duration.count() << std::endl;
-       std::cout << "Current FPS " << 1 / (duration.count() / 1000) << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds( (int)(1.0/FPS * 1000) - (int)duration.count() ));
+     //  std::cout << "Current FPS " << 1 / (duration.count() / 1000) << std::endl;
+       // std::this_thread::sleep_for(std::chrono::milliseconds( (int)(1.0/FPS * 1000) - (int)duration.count() ));
         i++;
     }
    // STOP_CAP = 0;
-
+    std::thread infer(inference);
     infer.join();
+    }
 
     
 
     auto gen_end = std::chrono::high_resolution_clock::now();
-   double sum = 0;
-   double sum4 = 0;
+    double sum = 0;
+    double sum4 = 0;
     for (int i = 0; i < times.size(); i++) {
 	sum += times[i];
+    std::cout << i << ";" << diff[i] << std::endl;
     }
-   std::cout << "Average inference FPS = " <<1 /( sum / times.size()) << std::endl;
+
+    std::cout << "Average inference FPS = " <<1 /( sum / times.size()) << std::endl;
     std::cout << "Average full FPS= " << FRAMES / (std::chrono::duration<double, std::milli>(gen_end - gen_start).count() / 1000 ) << std::endl;
 
 }

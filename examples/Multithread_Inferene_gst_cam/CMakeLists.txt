@@ -30,7 +30,7 @@ include_directories(
 )
 
 # Добавить исполняемый файл
-add_executable(main src/inference_gst_cam_mjpg.cpp src/utils.cpp)
+add_executable(main inference_gst_cam_mjpg_READY.cpp utils.cpp)
 
 # Линковка с библиотеками
 target_link_libraries(main

@@ -1,9 +1,8 @@
-#include "../include/utils.hpp"
+#include "utils.hpp"
 
 
 
 
-struct drm_mode_fb_cmd fb = {};
 int drm_fd;
 uint8_t* map = nullptr;
 uint32_t fb_id;
@@ -13,7 +12,7 @@ uint64_t size;
 drmModeCrtc *old_crtc = nullptr;
 int running = 1;
 int frames = 0;
-std::vector<int> times;
+std::vector<double> times;
 static std::shared_ptr<uint8_t> page_aligned_alloc(size_t size)
 {
 #if defined(__unix__)
@@ -78,7 +77,7 @@ GstFlowReturn on_new_sample(GstAppSink *appsink, gpointer user_data) {
         bindings.output(output_name)->set_buffer(MemoryView(output_buffer.get(), output_frame_size));
     }
     auto start = std::chrono::high_resolution_clock::now();
-    auto job = infer_model.run_async(bindings,[&](const AsyncInferCompletionInfo & info){
+    auto job = infer_model.run_async(bindings,[&, start](const AsyncInferCompletionInfo & info){
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> duration = end - start;
         times.push_back(duration.count());
@@ -87,7 +86,12 @@ GstFlowReturn on_new_sample(GstAppSink *appsink, gpointer user_data) {
        // draw_bounding_boxes(context->map, bboxes, 640, 640, pitch);
         gst_buffer_unmap(buffer, &map_info);
         gst_sample_unref(sample);
+       // std::cout << frames << ";" << 1 / (duration.count() / 1000) << std::endl;
         frames++;
+        if (frames % 100 == 0) {
+            //std::cout << "FPS " << 1 / (duration.count() / 1000) << std::endl;
+            std::cout << frames << std::endl;
+        }
     }).expect("Failed to start async infer job");
     
     return GST_FLOW_OK;
@@ -130,11 +134,13 @@ int main(int argc, char* argv[]) {
     } 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
-    int sum = 0;
+    double sum = 0;
     for (int i = 0; i < times.size(); i++) {
         sum += times[i];
+        std::cout << i << ";" << 1 / (times[i] / 1000) << std::endl;
     }
-    std::cout << "Average inference FPS = " << frames / (sum / 1000) << std::endl;
+    std::cout << "Frames count = " << times.size() << std::endl;
+    std::cout << "Average inference FPS = " << times.size() / (sum / 1000) << std::endl;
     std::cout << "Average FPS = " << frames / (duration.count() / 1000) << std::endl;
     
 

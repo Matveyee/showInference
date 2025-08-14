@@ -10,7 +10,6 @@ extern "C" {
     #include <sys/mman.h>
     #include <xf86drm.h>
     #include <xf86drmMode.h>
-    #include <drm/drm_mode.h>
 }
 #include <iostream>
 #include <vector>

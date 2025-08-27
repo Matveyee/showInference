@@ -246,27 +246,34 @@ int main(int argc, char* argv[]) {
         av_read_frame(fmt_ctx, pkt);
         rga_buffer_t src;
         rga_buffer_t dst;
+        rga_buffer_t dst1;
         im_rect      src_rect;
         im_rect      dst_rect;
         rga_buffer_handle_t src_handle;
         rga_buffer_handle_t dst_handle;
+        rga_buffer_handle_t dst_handle1;
         memset(&src_rect, 0, sizeof(src_rect));
         memset(&dst_rect, 0, sizeof(dst_rect));
         memset(&src, 0, sizeof(src));
         memset(&dst, 0, sizeof(dst));
     //    char* src_buf = (char*)malloc(480*640*get_bpp_from_format(RK_FORMAT_YVYU_422));
-        char* dst_buf = (char*)malloc(640*640*get_bpp_from_format(RK_FORMAT_RGB_888));
+        char* dst_buf = (char*)malloc(640*640*get_bpp_from_format(RK_FORMAT_YUYV_422));
+        char* dst_buf1 = (char*)malloc(640*640*get_bpp_from_format(RK_FORMAT_RGB_888));
+        src = wrapbuffer_virtualaddr(pkt->data, 640, 480, RK_FORMAT_YUYV_422);
+        dst = wrapbuffer_virtualaddr(dst_buf, 640, 640, RK_FORMAT_YUYV_422);
+        dst1 = wrapbuffer_virtualaddr(dst_buf1, 640, 640, RK_FORMAT_RGB_888);
+        // src = wrapbuffer_handle(src_handle, 640, 480, RK_FORMAT_YUYV_422);
+        // dst = wrapbuffer_handle(dst_handle, 640, 640, RK_FORMAT_YUYV_422);
+        // dst1 = wrapbuffer_handle(dst_handle1, 640, 640, RK_FORMAT_RGB_888);
 
-        src_handle = importbuffer_virtualaddr(pkt->data, 640, 480, RK_FORMAT_YVYU_422);
-        dst_handle = importbuffer_virtualaddr(dst_buf, 640, 640, RK_FORMAT_RGB_888);
-        src = wrapbuffer_handle(src_handle, 640, 480, RK_FORMAT_YVYU_422);
-        dst = wrapbuffer_handle(dst_handle, 640, 640, RK_FORMAT_RGB_888);
         IM_STATUS STATUS = imresize(src, dst);
- //       if (pkt->convergence_duration == video_stream_idx) {
-            //debug("Before push");
-        queue.push(dst_buf);
-        releasebuffer_handle(src_handle);
-        releasebuffer_handle(dst_handle);
+
+        IM_STATUS STATUS2 = imcvtcolor(dst, dst1, RK_FORMAT_YUYV_422, RK_FORMAT_RGB_888);
+        free(dst_buf);
+
+        queue.push(dst_buf1);
+
+        
         captured_index++;
  //       }
         auto end = std::chrono::high_resolution_clock::now();

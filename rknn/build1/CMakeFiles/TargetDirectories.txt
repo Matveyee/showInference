@@ -1,0 +1,3 @@
+/home/user/showInference/rknn/build1/CMakeFiles/rebuild_cache.dir
+/home/user/showInference/rknn/build1/CMakeFiles/edit_cache.dir
+/home/user/showInference/rknn/build1/CMakeFiles/inference_rknn_cam_drm.dir

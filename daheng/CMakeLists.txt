@@ -10,6 +10,6 @@ link_directories("/usr/lib")
 link_directories(./libs )
 include_directories("/usr/include/libdrm")
 
-add_executable(main src/main.cpp)
+add_executable(main src/hard_trigger.cpp)
 
 target_link_libraries(main -lgxiapi -lrga HailoRT::libhailort -pthread -ldrm -lrockchip_mpp )

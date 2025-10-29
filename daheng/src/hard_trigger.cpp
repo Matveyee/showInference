@@ -131,10 +131,7 @@ class Projection {
 
         Projection(uint8_t* data_ptr, int offset_x, int offset_y, int source_w, int source_h, int width, int height) : data(data_ptr), offsetX(offset_x), offsetY(offset_y), w(width), h(height), sourceW(source_w), sourceH(source_h) {}
 
-        uint8_t operator [](int index) {  
-            // if ( ((offsetY + index / w) * sourceW + offsetX + index % w) >= 818559) {
-            //     std::cout << "Problem index " << (offsetY + index / w) * sourceW + offsetX + index % w << std::endl;
-            // }  
+        uint8_t operator [](int index) {   
             
             return data[(offsetY + index / w) * sourceW + offsetX + index % w];
         }
@@ -228,7 +225,7 @@ void draw_rect(uint8_t* map, int x, int y, int x1, int y1, uint32_t pitch) {
 
 
 
-void draw_bounding_boxes(uint8_t* map, const std::vector<NamedBbox>& bboxes, int width, int height, uint32_t pitch) {
+void draw_bounding_boxes(uint8_t* map, const std::vector<NamedBbox>& bboxes, int width, int height, uint32_t pitch, Projection proj) {
 
 
     for (const auto& named_bbox : bboxes) {
@@ -239,7 +236,7 @@ void draw_bounding_boxes(uint8_t* map, const std::vector<NamedBbox>& bboxes, int
         int y1 = y + static_cast<int>((bbox.y_max - bbox.y_min) * height);
 //        std::cout << "x = " << x << ", y = " << y << ", x1 = " << x1 << ", y1 = " << y1 << std::endl;
         if (x1 > 0 && x > 0 && y > 0 && y1 > 0) {
-            draw_rect(map, x , y, x1 ,y1, pitch);
+            draw_rect(map, x + proj.getx() , y + proj.gety(), x1 + proj.getx() ,y1 + proj.gety(), pitch);
         }
     }
 }
@@ -415,7 +412,7 @@ void signal_handler(int signal) {
 }
 
 
-void frameProc(uint8_t* ptr) {
+void frameProc(uint8_t* ptr, Projection proj) {
   //  std::cout << "frame proc entered" << std::endl;
     auto &infer_model1 = configured_infer_model;
     auto bindings = infer_model1.create_bindings().expect("Failed to create bindings");
@@ -440,16 +437,12 @@ void frameProc(uint8_t* ptr) {
 
         auto bboxes = parse_nms_data(output_buffer.get(), 80);
 
-        draw_bounding_boxes(map, bboxes, 640, 640, pitch);
+        draw_bounding_boxes(map, bboxes, 640, 640, pitch, proj);
 
-        // auto end = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<double, std::milli> duration = end - start;
-        // times.push_back( duration.count() / 1000);
+        
         processed_index++;
         free(ptr);
-     //   dqueue.pop_front();
-        
-       // debug("End inference");
+   
     }).expect("Failed to start async infer job");
     
 
@@ -480,7 +473,23 @@ void decode() {
         
     }
 }
+void drawPicture(Projection proj, uint8_t* data) {
+     for (int y = 0; y < 640; ++y) {
+        for (int x = 0; x < 640; ++x) {
+            int src_offset = y * 640 * 3  + x * 3;
+            
+            uint8_t r = data[src_offset + 0];
+            uint8_t g = data[src_offset + 1];
+            uint8_t b = data[src_offset + 2];
 
+            uint32_t pixel = (0xFF << 24) | (r << 16) | (g << 8) | b;
+          //  debug("before screen");
+        //  std::cout << "data y " << data.gety()
+            ((uint32_t*)(map + (y + proj.gety() ) * pitch))[x + proj.getx() ] = pixel;
+        }
+
+    }
+}
 // void startInference() {
 //     std::cout << "startInference entered " << std::endl;
 //     while (stop == 1) {
@@ -491,46 +500,22 @@ void decode() {
 
 void callBack(GX_FRAME_CALLBACK_PARAM* pFrame) {
     std::cout << "Call Back" << std::endl;
-   // std::cout << "pframe stat" << pFrame->status << std::endl;
-  //  empty_mutex.lock();
-  //  debug("getting frame");
+
     uint8_t* ptr = (uint8_t*)pFrame->pImgBuf;
-  //  debug("frame got");
+
     Projection block1(ptr, 0, 0, 1280, 1280, W, H);
-   // debug("proj made");
-    // Projection block2(ptr, 640, 0, 1280, 1280, W, H);
+    Projection block2(ptr, 640, 0, 1280, 1280, W, H);
     // Projection block3(ptr, 0, 640, 1280, 1280, W, H);
     // Projection block4(ptr, 640, 640, 1280, 1280, W, H);
     uint8_t* data = toRGB(block1);
+    drawPicture(block1, data);
+    uint8_t* data1 = toRGB(block2);
+    drawPicture(block2, data1);
 
-    for (int y = 0; y < 640; ++y) {
-        for (int x = 0; x < 640; ++x) {
-           int src_offset = y * 640 * 3  + x * 3;
-            
-            uint8_t r = data[src_offset + 0];
-            uint8_t g = data[src_offset + 1];
-            uint8_t b = data[src_offset + 2];
 
-            uint32_t pixel = (0xFF << 24) | (r << 16) | (g << 8) | b;
-          //  debug("before screen");
-            ((uint32_t*)(map + y * pitch))[x] = pixel;
-        }
+    frameProc(data, block1);
+    frameProc(data1, block2);
 
-    }
-   frameProc(data);
-
-  //  debug("converted");
-  //  frameProc(pic1);
-    // uint8_t* pic2 = toRGB(block2);
-    // uint8_t* pic3 = toRGB(block3);
-    // uint8_t* pic4 = toRGB(block4);
-    //  debug("after rgb");
- //   queue.pop_front();
-    //  debug("after queue pop");
-//    dqueue.push(pic1);
-    // dqueue.push(pic2);
-    // dqueue.push(pic3);
-    // dqueue.push(pic4);
     global++;
 }
 
@@ -603,9 +588,7 @@ int main(int argc, char* argv[]) {
 
     drmModeSetCrtc(drm_fd, crtc_id, fb_id, 0, 0, &conn_id, 1, &mode);
 
-    // vdevice = VDevice::create().expect("Failed create vdevice");
-    // infer_model = vdevice->create_infer_model(HEF_FILE).expect("Failed to create infer model");
-    // configured_infer_model = infer_model->configure().expect("Failed to create configured infer model");
+  
 
     debug("Drm end");
     GX_STATUS status = GX_STATUS_SUCCESS;
@@ -671,17 +654,7 @@ int main(int argc, char* argv[]) {
     status = GXSendCommand(hDevice, GX_COMMAND_ACQUISITION_STOP);
 
     status = GXUnregisterCaptureCallback(hDevice);
-  //  status = GXStreamOn(hDevice);
-    
-  //  std::thread dec(decode);
-    // while (stop == 1) {
-    //     PGX_FRAME_BUFFER pFrameBuffer;
-
-    //     status = GXDQBuf(hDevice, &pFrameBuffer, 1000);
-    //    // std::this_thread::sleep_for(std::chrono::microseconds(35));
-
-    //     queue.push(pFrameBuffer);
-    // }
+ 
     
     if (old_crtc) {
         drmModeSetCrtc(drm_fd, old_crtc->crtc_id, old_crtc->buffer_id,

@@ -13,7 +13,6 @@ extern "C" {
 }
 #include <csignal>
 #include <sys/mman.h>
-#include "hailo/hailort.hpp"
 
 #include "rga/RgaUtils.h"
 #include "rga/im2d.h"
@@ -177,7 +176,7 @@ void inference() {
 
 int main(int argc, char* argv[]) {
 
-    if (argc == 0) {
+    if (argc == 1) {
         std::cout << "Usage: " << std::endl;
         std::cout << argv[0] << " {path to HEF file} {path to avi yuyv 480x640 file} {count of frames to process} {input FPS}" << std::endl;
         return 0;

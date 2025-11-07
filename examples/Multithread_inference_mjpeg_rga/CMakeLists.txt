@@ -8,10 +8,12 @@ set( ARCH "X86" STRING)
 find_package(OpenCV REQUIRED)
 
 include_directories("/usr/local/include/opencv4")
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories("/home/user/OnlineDetection/include")
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(".include/")
-find_package(HailoRT REQUIRED)
+include_directories("/home/user/hailort-4.23.0/hailort/libhailort/include/")
+find_library(HAILORT hailort HINTS ${CMAKE_SOURCE_DIR}/libs)
+find_library(RGA rga HINTS ${CMAKE_SOURCE_DIR}/libs)
+
 
 
 link_directories("/usr/local/lib")
@@ -35,10 +37,7 @@ target_link_libraries(main
     -lz
     -llzma
     -lm
-    -lrga
-    -ldrm
     -ldl
-    HailoRT::libhailort
-    -lrockchip_mpp
+    ${HAILORT}
+    ${RGA}
 )
-target_link_libraries(main HailoRT::libhailort)

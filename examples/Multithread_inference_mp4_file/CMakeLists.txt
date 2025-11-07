@@ -9,13 +9,14 @@ find_package(OpenCV REQUIRED)
 
 include_directories("/usr/local/include/opencv4")
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories("/home/user/OnlineDetection/include")
+
 include_directories(".include/")
 include_directories("/usr/local/include/rockchip")
-include_directories("/usr/local/mpp/include/rockchip/")
-link_directories(/usr/lib/aarch64-linux-gnu)
+include_directories("/home/user/hailort-4.23.0/hailort/libhailort/include/")
+
 include_directories(${OpenCV_INCLUDE_DIRS})
-find_package(HailoRT REQUIRED)
+find_library(HAILORT hailort HINTS ${CMAKE_SOURCE_DIR}/libs)
+find_library(RGA rga HINTS ${CMAKE_SOURCE_DIR}/libs)
 
 link_directories("/usr/local/lib")
 if(ARCH STREQUAL "X86")
@@ -23,7 +24,7 @@ if(ARCH STREQUAL "X86")
 else()
 	link_directories("/usr/lib/aarch64-linux-gnu")
 endif()
-#set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
+
 add_executable(main MultithreadInference_mp4_file_640_READY.cpp )
 
 target_link_libraries(main
@@ -38,10 +39,8 @@ target_link_libraries(main
     -lz
     -llzma
     -lm
-    -lrga
-    -ldrm
+    
     -ldl
-    HailoRT::libhailort
-    ${OpenCV_LIBS}
-    -lrockchip_mpp
+    ${HAILORT}
+    ${RGA}
 )

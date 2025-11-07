@@ -13,10 +13,10 @@
 #include <chrono>
 #include <cmath>
 
-#include "hailo/hailort.hpp"
+#include "/home/user/hailort-4.23.0/hailort/libhailort/include/hailo/hailort.hpp"
 
 extern "C" {
-#include "rk_mpi.h"
+// #include "rk_mpi.h"
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
@@ -52,13 +52,13 @@ static std::shared_ptr<uint8_t> page_aligned_alloc(size_t size) {
     return std::shared_ptr<uint8_t>(reinterpret_cast<uint8_t*>(addr), [size](void *addr) { munmap(addr, size); });
 }
 
-int init_hw_device() {
-    if (av_hwdevice_ctx_create(&hw_device_ctx, AV_HWDEVICE_TYPE_RKMPP, nullptr, nullptr, 0) < 0) {
-        std::cerr << "Failed to create RKMPP hwdevice context" << std::endl;
-        return -1;
-    }
-    return 0;
-}
+// int init_hw_device() {
+//     if (av_hwdevice_ctx_create(&hw_device_ctx, AV_HWDEVICE_TYPE_RKMPP, nullptr, nullptr, 0) < 0) {
+//         std::cerr << "Failed to create RKMPP hwdevice context" << std::endl;
+//         return -1;
+//     }
+//     return 0;
+// }
 
 void inference_loop(int width, int height) {
     SwsContext* sws_ctx = sws_getContext(
@@ -124,7 +124,9 @@ int main(int argc, char* argv[]) {
     infer_model = vdevice->create_infer_model(hef_file).expect("Failed to create infer model");
     configured_infer_model = infer_model->configure().expect("Failed to configure model");
 
-    if (init_hw_device() != 0) return -1;
+    std::cout << "Hailo skip" << std::endl;
+ 
+    // if (init_hw_device() != 0) return -1;
 
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_open_input(&fmt_ctx, input_path.c_str(), nullptr, nullptr) != 0) {

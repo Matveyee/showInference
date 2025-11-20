@@ -1,0 +1,3 @@
+/home/user/showInference/complete_examples/Multithread_inference/build_mjpeg/CMakeFiles/main.dir
+/home/user/showInference/complete_examples/Multithread_inference/build_mjpeg/CMakeFiles/edit_cache.dir
+/home/user/showInference/complete_examples/Multithread_inference/build_mjpeg/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,413 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <iostream>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/dma-heap.h>
+
+#include "../include/rga/RgaUtils.h"
+#include "../include/rga/im2d.h"
+#include "../include/rga/rga.h"
+#include "../include/inc/rk_mpi.h"
+
+#include "../include/hailo/hailort.hpp"
+#include "../include/hailo_infer.hpp"
+#define PACKET_SIZE 8192
+
+using namespace hailort;
+
+void log(std::string message) {
+    std::cout << "[INFO] : " << message << std::endl;
+}
+
+static void save_nv12_compact(MppFrame frame, FILE *fout) {
+    MppBuffer buffer = mpp_frame_get_buffer(frame);
+    uint8_t *src = (uint8_t*)mpp_buffer_get_ptr(buffer);
+
+    int w  = mpp_frame_get_width(frame);
+    int h  = mpp_frame_get_height(frame);
+    int hor_stride = mpp_frame_get_hor_stride(frame);
+    int ver_stride = mpp_frame_get_ver_stride(frame);
+
+    uint8_t *y_plane  = src;
+    uint8_t *uv_plane = src + hor_stride * ver_stride;
+
+    // Y-плоскость: берем только width байт из каждой строки
+    for (int y = 0; y < h; y++) {
+        fwrite(y_plane + y * hor_stride, 1, w, fout);
+    }
+
+    // UV-плоскость: тоже width байт на строку, высота h/2
+    for (int y = 0; y < h / 2; y++) {
+        fwrite(uv_plane + y * hor_stride, 1, w, fout);
+    }
+}
+
+int convert_with_rga(MppFrame frame) {
+    rga_buffer_t src;
+    rga_buffer_t dst;
+    rga_buffer_t final_dst;
+
+    MppBuffer mpp_buffer = mpp_frame_get_buffer(frame);
+    int src_fd = mpp_buffer_get_fd(mpp_buffer);
+
+    // NV12 WIDTHxHEIGHT dma-buffer Image
+
+    src = wrapbuffer_fd_t(
+        src_fd,
+        mpp_frame_get_width(frame), 
+        mpp_frame_get_height(frame), 
+        mpp_frame_get_hor_stride(frame), 
+        mpp_frame_get_ver_stride(frame), 
+        RK_FORMAT_YCbCr_420_SP);
+    
+
+    int heap_fd = open("/dev/dma_heap/system", O_RDWR);
+    if (heap_fd < 0) {
+        perror("open /dev/dma_heap/system");
+        mpp_frame_deinit(&frame);
+    }
+
+    // creating dma-buffer
+
+    struct dma_heap_allocation_data req;
+    memset(&req, 0, sizeof(req));
+    req.len       = 640*640*3/2;
+    req.fd_flags  = O_RDWR | O_CLOEXEC;
+    req.heap_flags = 0;
+
+    if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &req) < 0) {
+        perror("DMA_HEAP_IOCTL_ALLOC");
+        close(heap_fd);
+        mpp_frame_deinit(&frame);
+    }
+
+    int dst_fd = req.fd;
+
+    //
+
+    // NV12 640x640 dma-buffer Image
+    dst = wrapbuffer_fd(dst_fd, 640, 640, RK_FORMAT_YCbCr_420_SP);
+
+    IM_STATUS status = imresize(src, dst);
+
+    //releasing mpp buffers
+
+    mpp_buffer_put(mpp_buffer);
+    mpp_frame_deinit(&frame);
+
+    // creating rgb dma buffer
+
+    memset(&req, 0, sizeof(req));
+    req.len       = 640*640*3;
+    req.fd_flags  = O_RDWR | O_CLOEXEC;
+    req.heap_flags = 0;
+
+    if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &req) < 0) {
+        perror("DMA_HEAP_IOCTL_ALLOC");
+        close(heap_fd);
+        mpp_frame_deinit(&frame);
+    }
+
+    int rgb_fd = req.fd;
+
+    final_dst = wrapbuffer_fd(rgb_fd, 640, 640, RK_FORMAT_RGB_888);
+
+    status = imcvtcolor(dst, final_dst, RK_FORMAT_YCbCr_420_SP, RK_FORMAT_RGB_888);
+
+    close(dst_fd);
+
+    return rgb_fd;
+
+
+}
+
+int main(int argc, char **argv) {
+
+
+    if (argc < 3) {
+        printf("Usage: %s input.h264 model.hef\n", argv[0]);
+        return -1;
+    }
+
+    const char *in_name  = argv[1];
+
+    auto vdevice_exp = VDevice::create();
+    if (!vdevice_exp) {
+        std::cerr << "Failed to create VDevice: " << vdevice_exp.status() << std::endl;
+        return vdevice_exp.status();
+    }
+    std::unique_ptr<VDevice> vdevice = std::move(vdevice_exp.value());
+
+    auto hef_exp = Hef::create(argv[2]);
+    if (!hef_exp) {
+        std::cerr << "Failed to create Hef: " << hef_exp.status() << std::endl;
+        return hef_exp.status();
+    }
+    Hef hef = std::move(hef_exp.value());
+
+
+    auto infer_model_exp = vdevice->create_infer_model(hef);
+    if (!infer_model_exp) {
+        std::cerr << "Failed to create InferModel: " << infer_model_exp.status() << std::endl;
+        return infer_model_exp.status();
+    }
+    std::shared_ptr<hailort::InferModel> infer_model = infer_model_exp.value();
+
+
+    auto configured_exp = infer_model->configure();
+    if (!configured_exp) {
+        std::cerr << "Failed to configure InferModel: " << configured_exp.status() << std::endl;
+        return configured_exp.status();
+    }
+    auto configured_model = std::move(configured_exp.value());
+
+
+
+    
+
+    FILE *fp = fopen(in_name, "rb");
+    if (!fp) {
+        perror("fopen input");
+        return -1;
+    }
+
+
+    MppCtx ctx   = nullptr;
+    MppApi *mpi  = nullptr;
+    MPP_RET ret  = MPP_OK;
+
+    ret = mpp_create(&ctx, &mpi);
+    if (ret) {
+        std::cout << "mpp_create failed: " << ret << std::endl;
+        return -1;
+    }
+
+    {
+        int split = 1;
+        MppParam param = &split;
+        mpi->control(ctx, MPP_DEC_SET_PARSER_SPLIT_MODE, param);
+    }
+
+    ret = mpp_init(ctx, MPP_CTX_DEC, MPP_VIDEO_CodingAVC);
+    if (ret) {
+        std::cout << "mpp_init failed: " << ret << std::endl;
+        return -1;
+    }
+
+    unsigned char *buf = (unsigned char *)malloc(PACKET_SIZE);
+    if (!buf) {
+        std::cout << "malloc failed" << std::endl;
+        return -1;
+    }
+
+    bool eos = false;
+
+    
+    MppBufferGroup ext_group = nullptr;
+    bool ext_group_inited = false;
+    log("Starting decoding");
+    while (!eos) {
+        int read_size = fread(buf, 1, PACKET_SIZE, fp);
+        if (read_size <= 0) {
+            eos = true;
+        }
+
+        if (!eos) {
+            MppPacket packet = nullptr;
+            ret = mpp_packet_init(&packet, buf, PACKET_SIZE);
+            if (ret) {
+                std::cout << "mpp_packet_init failed: " << ret << std::endl;
+                break;
+            }
+
+            mpp_packet_set_pos(packet, buf);
+            mpp_packet_set_length(packet, read_size);
+
+        put_again:
+            ret = mpi->decode_put_packet(ctx, packet);
+            std::cout << ret <<std::endl;
+            if (ret == MPP_OK) {
+             
+            } else if (ret == MPP_ERR_BUFFER_FULL) {
+               
+                while (1) {
+                    MppFrame frm = nullptr;
+                    MPP_RET r2 = mpi->decode_get_frame(ctx, &frm);
+                    if (r2 != MPP_OK || !frm)
+                        break;
+
+                    if (mpp_frame_get_info_change(frm)) {
+                       
+                        mpp_frame_deinit(&frm);
+                        continue;
+                    }
+
+                
+                    mpp_frame_deinit(&frm);
+                }
+
+                usleep(1000);
+               //log("again");
+                goto put_again;
+            } else {
+                std::cout << "decode_put_packet error: " << ret << std::endl;
+                mpp_packet_deinit(&packet);
+                break;
+            }
+
+            mpp_packet_deinit(&packet);
+        } else {
+            
+            MppPacket packet = nullptr;
+            if (mpp_packet_init(&packet, nullptr, 0) == MPP_OK) {
+                mpp_packet_set_eos(packet);
+                mpi->decode_put_packet(ctx, packet);
+                mpp_packet_deinit(&packet);
+            }
+        }
+
+    
+        while (1) {
+            MppFrame frame = nullptr;
+            ret = mpi->decode_get_frame(ctx, &frame);
+            if (ret != MPP_OK){
+                std::cout << "decode_get_frame error: " << ret << std::endl;
+                break;
+            }
+            if (!frame) {
+                log("!frame");
+                break;
+            }
+                
+
+            std::cout << "Got frame: "
+              << " info_change=" << mpp_frame_get_info_change(frame)
+              << " errinfo=" << mpp_frame_get_errinfo(frame)
+              << " eos=" << mpp_frame_get_eos(frame)
+              << std::endl;
+
+            if (mpp_frame_get_info_change(frame)) {
+                
+                int w  = mpp_frame_get_width(frame);
+                int h  = mpp_frame_get_height(frame);
+                int hor_stride = mpp_frame_get_hor_stride(frame);
+                int ver_stride = mpp_frame_get_ver_stride(frame);
+                size_t buf_size = mpp_frame_get_buf_size(frame);
+
+                std::cout << "INFO_CHANGE: " << w << "x" << h
+                          << " stride " << hor_stride << "x" << ver_stride
+                          << " buf_size " << buf_size << std::endl;
+
+                if (!ext_group_inited) {
+                    
+                    ret = mpp_buffer_group_get_external(&ext_group, MPP_BUFFER_TYPE_DMA_HEAP);
+                    if (ret) {
+                        std::cout << "mpp_buffer_group_get_external failed: " << ret << std::endl;
+                        mpp_frame_deinit(&frame);
+                        goto EXIT;
+                    }
+
+                    
+                    int heap_fd = open("/dev/dma_heap/system", O_RDWR);
+                    if (heap_fd < 0) {
+                        perror("open /dev/dma_heap/system");
+                        mpp_frame_deinit(&frame);
+                        goto EXIT;
+                    }
+
+                    int buffer_count = 20; 
+                    for (int i = 0; i < buffer_count; i++) {
+                        struct dma_heap_allocation_data req;
+                        memset(&req, 0, sizeof(req));
+                        req.len       = buf_size;
+                        req.fd_flags  = O_RDWR | O_CLOEXEC;
+                        req.heap_flags = 0;
+
+                        if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &req) < 0) {
+                            perror("DMA_HEAP_IOCTL_ALLOC");
+                            close(heap_fd);
+                            mpp_frame_deinit(&frame);
+                            goto EXIT;
+                        }
+
+                        int dma_fd = req.fd;
+
+                        MppBufferInfo info;
+                        memset(&info, 0, sizeof(info));
+                        info.type  = MPP_BUFFER_TYPE_DMA_HEAP;
+                        info.size  = buf_size;
+                        info.fd    = dma_fd;
+                        info.index = i;
+
+                        MppBuffer mbuf = nullptr;
+                        ret = mpp_buffer_import(&mbuf, &info);
+                        if (ret) {
+                            std::cout << "mpp_buffer_import failed: " << ret << std::endl;
+                            close(heap_fd);
+                            mpp_frame_deinit(&frame);
+                            goto EXIT;
+                        }
+
+                        ret = mpp_buffer_commit(ext_group, &info);
+                        if (ret) {
+                            std::cout << "mpp_buffer_commit failed: " << ret << std::endl;
+                            close(heap_fd);
+                            mpp_frame_deinit(&frame);
+                            goto EXIT;
+                        }
+                    }
+
+                    close(heap_fd);
+
+                    
+                    ret = mpi->control(ctx, MPP_DEC_SET_EXT_BUF_GROUP, ext_group);
+                    if (ret) {
+                        std::cout << "MPP_DEC_SET_EXT_BUF_GROUP failed: " << ret << std::endl;
+                        mpp_frame_deinit(&frame);
+                        goto EXIT;
+                    }
+
+                    ext_group_inited = true;
+                }
+
+                
+                mpi->control(ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
+                mpp_frame_deinit(&frame);
+                continue;
+            }
+
+            if (!mpp_frame_get_errinfo(frame)) {
+                
+                log("Frame decoded");
+                int rgb_fd = convert_with_rga(frame);
+                inference(configured_model, infer_model, rgb_fd);
+                close(rgb_fd);
+                
+
+                
+            } 
+
+            if (mpp_frame_get_eos(frame)) {
+                std::cout << "Got EOS frame" << std::endl;
+                mpp_frame_deinit(&frame);
+                eos = true;
+                break;
+            }
+
+            mpp_frame_deinit(&frame);
+        }
+    }
+
+EXIT:
+    if (buf)
+        free(buf);
+    if (fp)
+        fclose(fp);
+    if (ctx)
+        mpp_destroy(ctx);
+
+    return 0;
+}

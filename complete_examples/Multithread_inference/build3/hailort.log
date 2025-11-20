@@ -1,0 +1,227 @@
+[2025-11-17 15:06:20.263] [3552] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:06:20.277] [3552] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:06:20.278] [3552] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:06:20.278] [3552] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:06:20.294] [3552] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:06:20.294] [3552] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:06:20.306] [3552] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:06:20.306] [3552] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:06:20.343] [3552] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 48.342319 milliseconds
+[2025-11-17 15:06:20.344] [3552] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 49.789844 milliseconds
+[2025-11-17 15:06:20.344] [3552] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:06:20.345] [3552] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:06:20.346] [3552] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:06:20.346] [3552] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:06:20.348] [3552] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:06:20.348] [3552] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 3559)
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 3560)
+[2025-11-17 15:06:20.360] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:06:20.361] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Process | inputs: AsyncHwEl[0] AsyncHwEl[1] AsyncHwEl[2] AsyncHwEl[3] AsyncHwEl[4] AsyncHwEl[5] AsyncHwEl[6] AsyncHwEl[7] AsyncHwEl[8] | outputs: NmsPPMuxEl0YOLOX-Post-Process(running in thread_id: 3561)
+[2025-11-17 15:06:20.361] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] NmsPPMuxEl0YOLOX-Post-Process | inputs: MultiPushQEl0YOLOX-Post-Process[0] | outputs: LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process
+[2025-11-17 15:06:20.361] [3552] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process | inputs: NmsPPMuxEl0YOLOX-Post-Process[0] | outputs: user
+[2025-11-17 15:14:37.660] [3811] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:14:37.674] [3811] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:14:37.675] [3811] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:14:37.675] [3811] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:14:37.691] [3811] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:14:37.691] [3811] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:14:37.704] [3811] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:14:37.705] [3811] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:14:37.739] [3811] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 47.803889 milliseconds
+[2025-11-17 15:14:37.740] [3811] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 49.11784 milliseconds
+[2025-11-17 15:14:37.740] [3811] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:14:37.741] [3811] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:14:37.742] [3811] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:14:37.742] [3811] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:14:37.744] [3811] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:14:37.744] [3811] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 3823)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 3824)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Process | inputs: AsyncHwEl[0] AsyncHwEl[1] AsyncHwEl[2] AsyncHwEl[3] AsyncHwEl[4] AsyncHwEl[5] AsyncHwEl[6] AsyncHwEl[7] AsyncHwEl[8] | outputs: NmsPPMuxEl0YOLOX-Post-Process(running in thread_id: 3825)
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] NmsPPMuxEl0YOLOX-Post-Process | inputs: MultiPushQEl0YOLOX-Post-Process[0] | outputs: LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process
+[2025-11-17 15:14:37.756] [3811] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process | inputs: NmsPPMuxEl0YOLOX-Post-Process[0] | outputs: user
+[2025-11-17 15:19:14.027] [3946] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:19:14.041] [3946] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:19:14.042] [3946] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:19:14.042] [3946] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:19:14.058] [3946] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:19:14.058] [3946] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:19:14.071] [3946] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:19:14.071] [3946] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:19:14.104] [3946] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 45.557733 milliseconds
+[2025-11-17 15:19:14.105] [3946] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 47.085453 milliseconds
+[2025-11-17 15:19:14.105] [3946] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:19:14.106] [3946] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:19:14.107] [3946] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:19:14.107] [3946] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:19:14.109] [3946] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:19:14.109] [3946] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 3953)
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 3954)
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:19:14.121] [3946] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proc[2025-11-17 15:24:05.914] [4139] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:24:05.929] [4139] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:24:05.930] [4139] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:24:05.930] [4139] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:24:05.945] [4139] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:24:05.945] [4139] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:24:05.957] [4139] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:24:05.957] [4139] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:24:05.994] [4139] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 47.996 milliseconds
+[2025-11-17 15:24:05.995] [4139] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 49.466271 milliseconds
+[2025-11-17 15:24:05.995] [4139] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:24:05.996] [4139] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:24:05.996] [4139] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:24:05.997] [4139] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:24:05.998] [4139] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:24:05.999] [4139] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4146)
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4147)
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:24:06.011] [4139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Process[2025-11-17 15:25:19.414] [4313] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:25:19.429] [4313] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:25:19.430] [4313] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:25:19.430] [4313] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:25:19.446] [4313] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:25:19.446] [4313] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:25:19.459] [4313] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:25:19.459] [4313] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:25:19.493] [4313] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 46.71973 milliseconds
+[2025-11-17 15:25:19.494] [4313] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 48.172795 milliseconds
+[2025-11-17 15:25:19.494] [4313] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:25:19.495] [4313] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:25:19.496] [4313] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:25:19.496] [4313] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:25:19.497] [4313] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:25:19.498] [4313] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4320)
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4321)
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:25:19.510] [4313] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proce[2025-11-17 15:25:31.768] [4443] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:25:31.782] [4443] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:25:31.782] [4443] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:25:31.783] [4443] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:25:31.798] [4443] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:25:31.799] [4443] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:25:31.812] [4443] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:25:31.812] [4443] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:25:31.848] [4443] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 49.017166 milliseconds
+[2025-11-17 15:25:31.849] [4443] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 50.43669 milliseconds
+[2025-11-17 15:25:31.849] [4443] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:25:31.850] [4443] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:25:31.851] [4443] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:25:31.851] [4443] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:25:31.853] [4443] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:25:31.853] [4443] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4450)
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4451)
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:25:31.865] [4443] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proce[2025-11-17 15:26:32.613] [4580] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:26:32.628] [4580] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:26:32.629] [4580] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:26:32.629] [4580] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:26:32.644] [4580] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:26:32.644] [4580] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:26:32.657] [4580] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:26:32.657] [4580] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:26:32.692] [4580] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 47.001808 milliseconds
+[2025-11-17 15:26:32.693] [4580] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 48.576206 milliseconds
+[2025-11-17 15:26:32.693] [4580] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:26:32.694] [4580] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:26:32.695] [4580] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:26:32.695] [4580] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:26:32.697] [4580] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:26:32.697] [4580] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4587)
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4588)
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:26:32.709] [4580] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proc[2025-11-17 15:28:14.486] [4735] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:28:14.500] [4735] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:28:14.501] [4735] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:28:14.501] [4735] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:28:14.517] [4735] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:28:14.517] [4735] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:28:14.529] [4735] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:28:14.529] [4735] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:28:14.563] [4735] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 45.513497 milliseconds
+[2025-11-17 15:28:14.564] [4735] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 46.956648 milliseconds
+[2025-11-17 15:28:14.564] [4735] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:28:14.565] [4735] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:28:14.566] [4735] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:28:14.566] [4735] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:28:14.568] [4735] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:28:14.568] [4735] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4742)
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4743)
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:28:14.580] [4735] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proc[2025-11-17 15:31:09.156] [4916] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:31:09.170] [4916] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:31:09.171] [4916] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:31:09.171] [4916] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:31:09.186] [4916] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:31:09.186] [4916] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:31:09.200] [4916] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:31:09.200] [4916] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:31:09.237] [4916] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 50.330676 milliseconds
+[2025-11-17 15:31:09.238] [4916] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 51.766246 milliseconds
+[2025-11-17 15:31:09.238] [4916] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:31:09.239] [4916] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:31:09.240] [4916] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:31:09.240] [4916] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:31:09.242] [4916] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:31:09.242] [4916] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 4923)
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 4924)
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:31:09.254] [4916] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proc[2025-11-17 15:38:22.257] [5139] [HailoRT] [info] [vdevice.cpp:535] [create] Creating vdevice with params: device_count: 1, scheduling_algorithm: ROUND_ROBIN, multi_process_service: false
+[2025-11-17 15:38:22.270] [5139] [HailoRT] [info] [device.cpp:51] [Device] OS Version: Linux 6.1.84+ #1 SMP Mon Sep 29 06:59:38 MSK 2025 aarch64
+[2025-11-17 15:38:22.271] [5139] [HailoRT] [info] [control.cpp:113] [control__parse_identify_results] firmware_version is: 4.23.0
+[2025-11-17 15:38:22.271] [5139] [HailoRT] [info] [vdevice.cpp:682] [create] VDevice Infos: 0000:01:00.0
+[2025-11-17 15:38:22.286] [5139] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:38:22.286] [5139] [HailoRT] [info] [hef.cpp:1994] [get_network_group_and_network_name] No name was given. Addressing all networks of default network_group: yolov6n
+[2025-11-17 15:38:22.299] [5139] [HailoRT] [info] [internal_buffer_manager.cpp:75] [print_execution_results] Default Internal buffer planner failed to meet requirements
+[2025-11-17 15:38:22.299] [5139] [HailoRT] [info] [internal_buffer_manager.cpp:86] [print_execution_results] Default Internal buffer planner executed successfully
+[2025-11-17 15:38:22.334] [5139] [HailoRT] [info] [device_internal.cpp:57] [configure] Configuring HEF took 46.811839 milliseconds
+[2025-11-17 15:38:22.335] [5139] [HailoRT] [info] [vdevice.cpp:780] [configure] Configuring HEF on VDevice took 48.246828 milliseconds
+[2025-11-17 15:38:22.335] [5139] [HailoRT] [info] [infer_model.cpp:417] [configure] Configuring network group 'yolov6n' with params: batch size: 0, power mode: PERFORMANCE, latency: NONE
+[2025-11-17 15:38:22.335] [5139] [HailoRT] [info] [multi_io_elements.cpp:754] [create] Created (AsyncHwEl)
+[2025-11-17 15:38:22.336] [5139] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (EntryPushQEl0yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:38:22.336] [5139] [HailoRT] [info] [filter_elements.cpp:101] [create] Created (PreInferEl3yolov6n/input_layer1 | Reorder - src_order: NHWC, src_shape: (640, 640, 3), dst_order: NHCW, dst_shape: (640, 640, 3))
+[2025-11-17 15:38:22.338] [5139] [HailoRT] [info] [queue_elements.cpp:450] [create] Created (PushQEl3yolov6n/input_layer1 | timeout: 10s)
+[2025-11-17 15:38:22.339] [5139] [HailoRT] [info] [multi_io_elements.cpp:135] [create] Created (NmsPPMuxEl0YOLOX-Post-Process | Op YOLOX, Name: YOLOX-Post-Process, Score threshold: 0.200, IoU threshold: 0.65, Classes: 80, Max bboxes per class: 100, Image height: 640, Image width: 640)
+[2025-11-17 15:38:22.350] [5139] [HailoRT] [info] [queue_elements.cpp:942] [create] Created (MultiPushQEl0YOLOX-Post-Process | timeout: 10s)
+[2025-11-17 15:38:22.350] [5139] [HailoRT] [info] [edge_elements.cpp:187] [create] Created (LastAsyncEl0NmsPPMuxEl0YOLOX-Post-Process)
+[2025-11-17 15:38:22.350] [5139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] EntryPushQEl0yolov6n/input_layer1 | inputs: user | outputs: PreInferEl3yolov6n/input_layer1(running in thread_id: 5146)
+[2025-11-17 15:38:22.350] [5139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PreInferEl3yolov6n/input_layer1 | inputs: EntryPushQEl0yolov6n/input_layer1[0] | outputs: PushQEl3yolov6n/input_layer1
+[2025-11-17 15:38:22.350] [5139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] PushQEl3yolov6n/input_layer1 | inputs: PreInferEl3yolov6n/input_layer1[0] | outputs: AsyncHwEl(running in thread_id: 5147)
+[2025-11-17 15:38:22.351] [5139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] AsyncHwEl | inputs: PushQEl3yolov6n/input_layer1[0] | outputs: MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process MultiPushQEl0YOLOX-Post-Process
+[2025-11-17 15:38:22.351] [5139] [HailoRT] [info] [pipeline.cpp:891] [print_deep_description] MultiPushQEl0YOLOX-Post-Proc

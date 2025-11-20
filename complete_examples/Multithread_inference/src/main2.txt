@@ -1,0 +1,216 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <iostream>
+
+#include "../../common_include/inc/rk_mpi.h"
+// RGA пока не нужен
+// #include "../../common_include/rga/RgaUtils.h"
+// #include "../../common_include/rga/im2d.h"
+// #include "../../common_include/rga/rga.h"
+
+#define PACKET_SIZE 8192
+
+void save_nv12_compact(MppFrame frame, FILE *fout) {
+    MppBuffer buffer = mpp_frame_get_buffer(frame);
+    uint8_t *src = (uint8_t*)mpp_buffer_get_ptr(buffer);
+
+    int w  = mpp_frame_get_width(frame);
+    int h  = mpp_frame_get_height(frame);
+
+    int hor_stride = mpp_frame_get_hor_stride(frame);
+    int ver_stride = mpp_frame_get_ver_stride(frame);
+
+    uint8_t *y_plane  = src;
+    uint8_t *uv_plane = src + hor_stride * ver_stride;
+
+    // Сохраняем Y плоскость
+    for (int y = 0; y < h; y++) {
+        fwrite(y_plane + y * hor_stride, 1, w, fout);
+    }
+
+    // Сохраняем UV плоскость (в NV12 каждая строка w байт)
+    for (int y = 0; y < h / 2; y++) {
+        fwrite(uv_plane + y * hor_stride, 1, w, fout);
+    }
+}
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        printf("Usage: %s input.h264\n", argv[0]);
+        return -1;
+    }
+
+    const char *filename = argv[1];
+    FILE *fp = fopen(filename, "rb");
+    static FILE *fout = fopen("output_nv12.yuv", "wb");
+    if (!fp) {
+        perror("fopen");
+        return -1;
+    }
+
+    MppCtx ctx   = nullptr;
+    MppApi *mpi  = nullptr;
+    MPP_RET ret  = MPP_OK;
+
+    // Создаём контекст
+    ret = mpp_create(&ctx, &mpi);
+    if (ret) {
+        std::cout << "mpp_create failed: " << ret << std::endl;
+        return -1;
+    }
+
+    // Включаем split mode парсера (не обязательно, но пусть будет)
+    {
+        int param = 1;
+        ret = mpi->control(ctx, MPP_DEC_SET_PARSER_SPLIT_MODE, &param);
+        if (ret) {
+            std::cout << "set split mode failed: " << ret << std::endl;
+            // не критично, можно продолжать
+        }
+    }
+
+    // Инициализация декодера для H.264
+    ret = mpp_init(ctx, MPP_CTX_DEC, MPP_VIDEO_CodingAVC);
+    if (ret) {
+        std::cout << "mpp_init failed: " << ret << std::endl;
+        return -1;
+    }
+
+    // Буфер для чтения кусков bitstream
+    unsigned char *buf = (unsigned char *)malloc(PACKET_SIZE);
+    if (!buf) {
+        std::cout << "malloc failed" << std::endl;
+        return -1;
+    }
+
+    bool eos = false;
+
+    while (!eos) {
+        int read_size = fread(buf, 1, PACKET_SIZE, fp);
+        if (read_size <= 0) {
+            // достигли конца файла – поставим eos-флаг
+            eos = true;
+        }
+
+        // Если ещё есть данные – отправляем их в декодер
+        if (!eos) {
+            MppPacket packet = nullptr;
+
+            // ВАЖНО: третий аргумент – размер буфера, а не длина данных
+            ret = mpp_packet_init(&packet, buf, PACKET_SIZE);
+            if (ret) {
+                std::cout << "mpp_packet_init failed: " << ret << std::endl;
+                break;
+            }
+
+            mpp_packet_set_pos(packet, buf);
+            mpp_packet_set_length(packet, read_size);
+
+        put_again:
+            ret = mpi->decode_put_packet(ctx, packet);
+
+            if (ret == MPP_OK) {
+                // пакет успешно принят
+            } else if (ret == MPP_ERR_BUFFER_FULL) {
+                // Очередь входных пакетов переполнена – нужно вытащить кадры
+                while (1) {
+                    MppFrame frm = nullptr;
+                    MPP_RET r2 = mpi->decode_get_frame(ctx, &frm);
+                    if (r2 != MPP_OK || !frm)
+                        break;
+
+                    if (mpp_frame_get_info_change(frm)) {
+                        // Декодер сообщает, что изменились параметры потока
+                        mpi->control(ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
+                        mpp_frame_deinit(&frm);
+                        continue;
+                    }
+
+                    // Здесь можно обработать кадр (но сейчас просто освобождаем)
+                    mpp_frame_deinit(&frm);
+                }
+
+                usleep(1000);
+                goto put_again;
+            } else {
+                std::cout << "decode_put_packet error: " << ret << std::endl;
+                mpp_packet_deinit(&packet);
+                break;
+            }
+
+            mpp_packet_deinit(&packet);
+        } else {
+            // EOF: можно отправить пустой пакет с EOS-флагом,
+            // чтобы вытащить хвост B-кадров
+            MppPacket packet = nullptr;
+            ret = mpp_packet_init(&packet, NULL, 0);
+            if (!ret) {
+                mpp_packet_set_eos(packet);
+                mpi->decode_put_packet(ctx, packet);
+                mpp_packet_deinit(&packet);
+            }
+        }
+
+        // После КАЖДОГО успешного put – читаем все доступные кадры
+        while (1) {
+            MppFrame frame = nullptr;
+            ret = mpi->decode_get_frame(ctx, &frame);
+            if (ret != MPP_OK)
+                break;
+            if (!frame)
+                break;
+
+            if (mpp_frame_get_info_change(frame)) {
+                // Первое событие info_change – декодер сообщает реальный размер кадра/stride и т.п.
+                // В internal mode достаточно просто подтвердить:
+                mpi->control(ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
+                mpp_frame_deinit(&frame);
+                continue;
+            }
+
+            if (!mpp_frame_get_errinfo(frame)) {
+                int w  = mpp_frame_get_width(frame);
+                int h  = mpp_frame_get_height(frame);
+
+                std::cout << "Decoded frame: " << w << "x" << h << std::endl;
+
+                save_nv12_compact(frame, fout);
+
+                // Здесь потом можно будет взять MppBuffer и передать в RGA / что угодно
+                // MppBuffer frm_buf = mpp_frame_get_buffer(frame);
+            }
+
+            if (mpp_frame_get_eos(frame)) {
+                std::cout << "Got EOS frame" << std::endl;
+                mpp_frame_deinit(&frame);
+                eos = true;
+                break;
+            }
+
+            mpp_frame_deinit(&frame);
+        }
+    }
+
+    // Финальный дренаж (на случай, если ещё есть кадры)
+    while (1) {
+        MppFrame frame = nullptr;
+        ret = mpi->decode_get_frame(ctx, &frame);
+        if (ret != MPP_OK || !frame)
+            break;
+
+        if (!mpp_frame_get_errinfo(frame)) {
+            int w = mpp_frame_get_width(frame);
+            int h = mpp_frame_get_height(frame);
+            std::cout << "Drain frame: " << w << "x" << h << std::endl;
+        }
+        mpp_frame_deinit(&frame);
+    }
+
+    free(buf);
+    fclose(fp);
+    mpp_destroy(ctx);
+
+    return 0;
+}

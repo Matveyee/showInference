@@ -1,0 +1,3 @@
+/home/user/showInference/examples/Multithread_inference_mp4_file/build2/CMakeFiles/main.dir
+/home/user/showInference/examples/Multithread_inference_mp4_file/build2/CMakeFiles/edit_cache.dir
+/home/user/showInference/examples/Multithread_inference_mp4_file/build2/CMakeFiles/rebuild_cache.dir

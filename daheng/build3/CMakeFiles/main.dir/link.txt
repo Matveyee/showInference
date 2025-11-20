@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/main.dir/src/hard_trigger.o -o main   -L/usr/local/lib  -L./libs  -Wl,-rpath,/usr/local/lib:./libs -lgxiapi -lrga /usr/local/lib/libhailort.so.4.21.0 -pthread -ldrm -lrockchip_mpp 

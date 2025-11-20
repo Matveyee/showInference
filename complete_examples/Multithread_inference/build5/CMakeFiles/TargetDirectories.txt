@@ -1,0 +1,3 @@
+/home/user/showInference/complete_examples/Multithread_inference/build5/CMakeFiles/main.dir
+/home/user/showInference/complete_examples/Multithread_inference/build5/CMakeFiles/edit_cache.dir
+/home/user/showInference/complete_examples/Multithread_inference/build5/CMakeFiles/rebuild_cache.dir

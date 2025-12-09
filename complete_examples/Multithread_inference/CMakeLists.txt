@@ -18,4 +18,4 @@ find_library(DRM_LIB drm HINTS /usr/lib /usr/local/lib)
 file(GLOB SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(main ${SRC_FILES})
 
-target_link_libraries(main PUBLIC ${MPP_LIB} ${RGA_LIB} ${HAILO_LIB} ${DRM_LIB})
+target_link_libraries(main PUBLIC pthread ${MPP_LIB} ${RGA_LIB} ${HAILO_LIB} ${DRM_LIB})

@@ -1,4 +1,4 @@
-build
+build*
 done_executables
 .vscode
 yolo
